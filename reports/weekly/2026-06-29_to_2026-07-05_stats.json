@@ -74,54 +74,54 @@
     "Toilet down": 8.9,
     "Toilet up": 7.1
   },
-  "mean_temperature_c": 23.7,
-  "mean_humidity_pct": 53.4,
+  "mean_temperature_c": 24.3,
+  "mean_humidity_pct": 52.2,
   "daily_mean_temperature_indoor": [
     {
       "date": "2026-06-29",
-      "value": 26.5
+      "value": 27.1
     },
     {
       "date": "2026-06-30",
-      "value": 24.8
+      "value": 24.9
     },
     {
       "date": "2026-07-01",
-      "value": 23.1
+      "value": 23.3
     },
     {
       "date": "2026-07-02",
-      "value": 23.1
+      "value": 23.6
     },
     {
       "date": "2026-07-03",
-      "value": 23.5
+      "value": 23.4
     },
     {
       "date": "2026-07-04",
-      "value": 23.7
+      "value": 23.9
     },
     {
       "date": "2026-07-05",
-      "value": 23.5
+      "value": 23.7
     }
   ],
   "daily_mean_humidity_indoor": [
     {
       "date": "2026-06-29",
-      "value": 47.0
+      "value": 47.1
     },
     {
       "date": "2026-06-30",
-      "value": 48.4
+      "value": 48.6
     },
     {
       "date": "2026-07-01",
-      "value": 57.0
+      "value": 57.1
     },
     {
       "date": "2026-07-02",
-      "value": 53.4
+      "value": 52.8
     },
     {
       "date": "2026-07-03",
@@ -129,11 +129,11 @@
     },
     {
       "date": "2026-07-04",
-      "value": 53.9
+      "value": 53.0
     },
     {
       "date": "2026-07-05",
-      "value": 56.0
+      "value": 54.8
     }
   ],
   "comfort_standard": {
@@ -368,8 +368,8 @@
     "Lowest temperature this week: 20.8\u00b0C in Bed 3 on 2026-07-01 08:20.",
     "Peak humidity this week: 68.7% in Bed 3 on 2026-07-01 08:20.",
     "Lowest humidity this week: 42.1% in Toilet down on 2026-06-30 13:20.",
-    "Mean temperature in the SSH this week was 23.7\u00b0C.",
-    "Mean humidity in the SSH this week was 53.4%.",
+    "Mean temperature in the SSH this week was 24.3\u00b0C.",
+    "Mean humidity in the SSH this week was 52.2%.",
     "Amp-hours consumed this week: 502.76 Ah."
   ],
   "best_comfort_room": {
