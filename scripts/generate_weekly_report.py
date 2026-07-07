@@ -45,8 +45,8 @@ def plot_raw_temperature(long_df, rooms):
         ax.plot(series["MessageDate"], series["Value"], label=room, linewidth=0.8, alpha=0.85)
     ax.set_title("Raw temperature readings by room")
     ax.set_ylabel("°C")
-    ax.xaxis.set_major_locator(mdates.DayLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+    ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %Hh"))
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), fontsize=8)
     fig.autofmt_xdate()
     return fig
