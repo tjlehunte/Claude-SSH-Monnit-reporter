@@ -14,7 +14,9 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from sensor_utils import condensation_margin, load_history_wide, risk_color, room_order, to_long
 
@@ -32,9 +34,27 @@ def fig_to_base64(fig):
     return base64.b64encode(buf.read()).decode("ascii")
 
 
+def plot_raw_temperature(long_df, rooms):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for room in rooms:
+        series = long_df[(long_df["Room"] == room) & (long_df["Metric"] == "Temperature")].sort_values(
+            "MessageDate"
+        )
+        if series.empty:
+            continue
+        ax.plot(series["MessageDate"], series["Value"], label=room, linewidth=0.8, alpha=0.85)
+    ax.set_title("Raw temperature readings by room")
+    ax.set_ylabel("°C")
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), fontsize=8)
+    fig.autofmt_xdate()
+    return fig
+
+
 def plot_daily_temperature(long_df, rooms):
     temp = long_df[long_df["Metric"] == "Temperature"].copy()
-    temp["Day"] = temp["MessageDate"].dt.date
+    temp["Day"] = pd.to_datetime(temp["MessageDate"].dt.date)
     daily_mean = temp.groupby(["Day", "Room"])["Value"].mean().reset_index()
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -45,6 +65,8 @@ def plot_daily_temperature(long_df, rooms):
         ax.plot(series["Day"], series["Value"], marker="o", label=room, linewidth=1.3)
     ax.set_title("Daily mean temperature by room")
     ax.set_ylabel("°C")
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), fontsize=8)
     fig.autofmt_xdate()
     return fig
@@ -78,7 +100,8 @@ def main():
     margin_df = condensation_margin(long_df)
     worst_margin = margin_df.groupby("Room")["Margin"].min().to_dict() if not margin_df.empty else {}
 
-    temp_chart = fig_to_base64(plot_daily_temperature(long_df, rooms))
+    raw_temp_chart = fig_to_base64(plot_raw_temperature(long_df, rooms))
+    daily_temp_chart = fig_to_base64(plot_daily_temperature(long_df, rooms))
     humidity_chart = fig_to_base64(
         plot_bar(avg_humidity, rooms, "Weekly average humidity by room", "% RH")
     )
@@ -165,7 +188,10 @@ ul {{ line-height: 1.6; }}
 <h2>AI insights</h2>
 <div id="ai-insights"><!-- AI_INSIGHTS_PLACEHOLDER --><p><em>Not yet generated.</em></p></div>
 <h2>Temperature</h2>
-<img src="data:image/png;base64,{temp_chart}" alt="Daily mean temperature by room">
+<h3>Raw readings</h3>
+<img src="data:image/png;base64,{raw_temp_chart}" alt="Raw temperature readings by room">
+<h3>Daily mean</h3>
+<img src="data:image/png;base64,{daily_temp_chart}" alt="Daily mean temperature by room">
 <h2>Humidity</h2>
 <img src="data:image/png;base64,{humidity_chart}" alt="Weekly average humidity by room">
 <h2>Condensation risk margin</h2>
