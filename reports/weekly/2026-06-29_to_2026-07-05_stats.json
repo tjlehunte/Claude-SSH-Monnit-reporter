@@ -20,6 +20,24 @@
     "Toilet up",
     "Outside"
   ],
+  "avg_temperature_by_room": {
+    "Bed 1": 24.1,
+    "Bed 2": 24.3,
+    "Bed 3": 24.6,
+    "Dining": 24.3,
+    "Ensuite": 23.9,
+    "Hall": 23.8,
+    "Kitchen": 24.4,
+    "Landing": 24.1,
+    "Loft 1": 22.6,
+    "Loft 2": 22.1,
+    "Lounge": 23.9,
+    "Network": 26.2,
+    "Outside": 19.3,
+    "Study": 23.8,
+    "Toilet down": 24.5,
+    "Toilet up": 24.1
+  },
   "avg_humidity_by_room": {
     "Bed 1": 52.2,
     "Bed 2": 51.8,
@@ -56,6 +74,161 @@
     "Toilet down": 8.9,
     "Toilet up": 7.1
   },
+  "daily_mean_temperature_indoor": [
+    {
+      "date": "2026-06-29",
+      "value": 26.5
+    },
+    {
+      "date": "2026-06-30",
+      "value": 24.8
+    },
+    {
+      "date": "2026-07-01",
+      "value": 23.1
+    },
+    {
+      "date": "2026-07-02",
+      "value": 23.1
+    },
+    {
+      "date": "2026-07-03",
+      "value": 23.5
+    },
+    {
+      "date": "2026-07-04",
+      "value": 23.7
+    },
+    {
+      "date": "2026-07-05",
+      "value": 23.5
+    }
+  ],
+  "daily_mean_humidity_indoor": [
+    {
+      "date": "2026-06-29",
+      "value": 47.0
+    },
+    {
+      "date": "2026-06-30",
+      "value": 48.4
+    },
+    {
+      "date": "2026-07-01",
+      "value": 57.0
+    },
+    {
+      "date": "2026-07-02",
+      "value": 53.4
+    },
+    {
+      "date": "2026-07-03",
+      "value": 51.7
+    },
+    {
+      "date": "2026-07-04",
+      "value": 53.9
+    },
+    {
+      "date": "2026-07-05",
+      "value": 56.0
+    }
+  ],
+  "comfort_standard": {
+    "name": "CIBSE Guide A",
+    "target_temperature_living_areas_c": 21.0,
+    "target_temperature_bedrooms_c": 18.0,
+    "comfortable_humidity_range_pct_rh": [
+      40.0,
+      60.0
+    ]
+  },
+  "thermal_comfort_ranking": [
+    {
+      "room": "Study",
+      "avg_temperature": 23.8,
+      "target_temperature": 21.0,
+      "avg_humidity": 52.5,
+      "comfort_score": 2.77
+    },
+    {
+      "room": "Hall",
+      "avg_temperature": 23.8,
+      "target_temperature": 21.0,
+      "avg_humidity": 54.4,
+      "comfort_score": 2.78
+    },
+    {
+      "room": "Lounge",
+      "avg_temperature": 23.9,
+      "target_temperature": 21.0,
+      "avg_humidity": 54.3,
+      "comfort_score": 2.86
+    },
+    {
+      "room": "Ensuite",
+      "avg_temperature": 23.9,
+      "target_temperature": 21.0,
+      "avg_humidity": 53.0,
+      "comfort_score": 2.94
+    },
+    {
+      "room": "Toilet up",
+      "avg_temperature": 24.1,
+      "target_temperature": 21.0,
+      "avg_humidity": 52.7,
+      "comfort_score": 3.06
+    },
+    {
+      "room": "Landing",
+      "avg_temperature": 24.1,
+      "target_temperature": 21.0,
+      "avg_humidity": 52.3,
+      "comfort_score": 3.15
+    },
+    {
+      "room": "Dining",
+      "avg_temperature": 24.3,
+      "target_temperature": 21.0,
+      "avg_humidity": 51.9,
+      "comfort_score": 3.25
+    },
+    {
+      "room": "Kitchen",
+      "avg_temperature": 24.4,
+      "target_temperature": 21.0,
+      "avg_humidity": 52.2,
+      "comfort_score": 3.4
+    },
+    {
+      "room": "Toilet down",
+      "avg_temperature": 24.5,
+      "target_temperature": 21.0,
+      "avg_humidity": 51.5,
+      "comfort_score": 3.45
+    },
+    {
+      "room": "Bed 1",
+      "avg_temperature": 24.1,
+      "target_temperature": 18.0,
+      "avg_humidity": 52.2,
+      "comfort_score": 6.15
+    },
+    {
+      "room": "Bed 2",
+      "avg_temperature": 24.3,
+      "target_temperature": 18.0,
+      "avg_humidity": 51.8,
+      "comfort_score": 6.26
+    },
+    {
+      "room": "Bed 3",
+      "avg_temperature": 24.6,
+      "target_temperature": 18.0,
+      "avg_humidity": 53.3,
+      "comfort_score": 6.56
+    }
+  ],
   "insights": [
     "Peak temperature this week: 34.1\u00b0C in Loft 1 on 2026-06-30 15:10.",
     "Lowest temperature this week: 14.1\u00b0C in Outside on 2026-07-03 03:10.",
@@ -63,6 +236,20 @@
     "Tightest condensation-risk margin this week: 1.1\u00b0C in Outside.",
     "Amp-hours consumed this week: 502.76 Ah."
   ],
+  "best_comfort_room": {
+    "room": "Study",
+    "avg_temperature": 23.8,
+    "target_temperature": 21.0,
+    "avg_humidity": 52.5,
+    "comfort_score": 2.77
+  },
+  "worst_comfort_room": {
+    "room": "Bed 3",
+    "avg_temperature": 24.6,
+    "target_temperature": 18.0,
+    "avg_humidity": 53.3,
+    "comfort_score": 6.56
+  },
   "peak_temperature": {
     "value": 34.1,
     "room": "Loft 1",
@@ -72,6 +259,20 @@
     "value": 14.1,
     "room": "Outside",
     "timestamp": "2026-07-03 03:10:00"
+  },
+  "peak_humidity": {
+    "value": 92.8,
+    "room": "Outside",
+    "timestamp": "2026-07-05 06:30:00"
+  },
+  "lowest_humidity": {
+    "value": 32.3,
+    "room": "Loft 1",
+    "timestamp": "2026-06-30 15:30:00"
+  },
+  "tightest_condensation_margin": {
+    "value": 1.1,
+    "room": "Outside"
   },
   "amp_hours_used": 502.76
 }
