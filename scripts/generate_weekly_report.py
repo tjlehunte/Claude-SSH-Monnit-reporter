@@ -22,11 +22,15 @@ import pandas as pd
 
 from sensor_utils import (
     condensation_margin,
+    detect_sharpest_change,
     load_history_wide,
     rank_thermal_comfort,
     risk_color,
     room_order,
     to_long,
+    SHARP_CHANGE_WINDOW_MINUTES,
+    SHARP_HUMIDITY_THRESHOLD_PCT,
+    SHARP_TEMPERATURE_THRESHOLD_C,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -197,6 +201,17 @@ def main():
         .groupby("Day")["Value"].mean()
     )
 
+    # Single sharpest short-window swing per metric (e.g. a window/door being
+    # opened), restricted to actual living-space rooms - outdoor and loft
+    # readings swing with the weather and aren't informative here. Only the
+    # single biggest qualifying event is kept, not every occurrence.
+    sharp_temp_change = detect_sharpest_change(
+        temp_series, SHARP_CHANGE_WINDOW_MINUTES, SHARP_TEMPERATURE_THRESHOLD_C
+    )
+    sharp_humidity_change = detect_sharpest_change(
+        humidity_series, SHARP_CHANGE_WINDOW_MINUTES, SHARP_HUMIDITY_THRESHOLD_PCT
+    )
+
     report_label = f"{start.strftime('%Y-%m-%d')}_to_{end.strftime('%Y-%m-%d')}"
 
     # Compact machine-readable stats, meant for a separate lightweight process
@@ -223,6 +238,8 @@ def main():
             "comfortable_humidity_range_pct_rh": [40.0, 60.0],
         },
         "thermal_comfort_ranking": comfort_ranking,
+        "sharpest_temperature_change": sharp_temp_change,
+        "sharpest_humidity_change": sharp_humidity_change,
         "insights": insights,
     }
     if comfort_ranking:

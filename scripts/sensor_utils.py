@@ -69,6 +69,50 @@ def rank_thermal_comfort(avg_temp_by_room, avg_humidity_by_room, exclude=NON_LIV
     return scored
 
 
+# Rooms excluded from "sharp change" detection (e.g. window-opening events) -
+# outdoor and unheated loft readings swing naturally with the weather and
+# aren't informative about occupant behaviour the way living-space rooms are.
+SHARP_CHANGE_EXCLUDE = {"Outside", "Loft 1", "Loft 2"}
+SHARP_CHANGE_WINDOW_MINUTES = 30
+SHARP_TEMPERATURE_THRESHOLD_C = 1.0
+SHARP_HUMIDITY_THRESHOLD_PCT = 5.0
+
+
+def detect_sharpest_change(metric_long_df, window_minutes, threshold, exclude=SHARP_CHANGE_EXCLUDE):
+    """Find the single largest-magnitude change within `window_minutes` for
+    any in-scope room, in either direction. Returns None if nothing in any
+    room exceeds `threshold`. Assumes readings are on Monnit's 10-minute grid.
+    """
+    window_steps = max(1, window_minutes // 10)
+    best = None
+    for room, sub in metric_long_df.groupby("Room"):
+        if room in exclude:
+            continue
+        sub = sub.sort_values("MessageDate").reset_index(drop=True)
+        if len(sub) <= window_steps:
+            continue
+        values = sub["Value"].to_numpy()
+        diffs = values[window_steps:] - values[:-window_steps]
+        if len(diffs) == 0:
+            continue
+        idx = int(abs(diffs).argmax())
+        change = diffs[idx]
+        if abs(change) < threshold:
+            continue
+        if best is None or abs(change) > abs(best["change"]):
+            best = {
+                "room": room,
+                "change": round(float(change), 1),
+                "direction": "drop" if change < 0 else "rise",
+                "from_time": sub["MessageDate"].iloc[idx].strftime("%Y-%m-%d %H:%M:%S"),
+                "from_value": round(float(values[idx]), 1),
+                "to_time": sub["MessageDate"].iloc[idx + window_steps].strftime("%Y-%m-%d %H:%M:%S"),
+                "to_value": round(float(values[idx + window_steps]), 1),
+                "window_minutes": window_minutes,
+            }
+    return best
+
+
 def load_history_wide():
     """Return the full history as a wide DataFrame, one row per MessageDate."""
     if not HISTORY_FILE.exists():
