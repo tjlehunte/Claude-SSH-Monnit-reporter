@@ -161,11 +161,12 @@ def find_collective_events(events, bucket_minutes=COLLECTIVE_BUCKET_MINUTES, min
     return collective
 
 
-# Rooms excluded when picking the week's single "peak"/"lowest" temperature
-# figure for the AI-insights text - Outside and the unheated lofts will
-# essentially always win those slots, which makes the figure meaningless as
-# a comment on the house itself. They stay fully visible in the charts.
-PEAK_TEMPERATURE_EXCLUDE = {"Outside", "Loft 1", "Loft 2"}
+# Rooms excluded when picking the "peak"/"lowest" (or warmest/coolest)
+# temperature figure - Outside, the unheated lofts, and the network cupboard
+# (full of heat-generating equipment) will essentially always win those
+# slots, which makes the figure meaningless as a comment on the house
+# itself. Same set as NON_LIVING_ROOMS; they stay fully visible in charts.
+PEAK_TEMPERATURE_EXCLUDE = NON_LIVING_ROOMS
 
 # Condensation risk is dominated by Outside's naturally different profile;
 # excluded from the single "tightest margin" figure (charts still show it).
