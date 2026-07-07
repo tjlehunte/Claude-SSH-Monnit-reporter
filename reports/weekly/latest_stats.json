@@ -362,10 +362,10 @@
   ],
   "collective_humidity_events": [],
   "insights": [
-    "Peak temperature this week: 34.1\u00b0C in Loft 1 on 2026-06-30 15:10.",
-    "Lowest temperature this week: 14.1\u00b0C in Outside on 2026-07-03 03:10.",
+    "Peak temperature this week: 30.8\u00b0C in Network on 2026-06-29 00:00.",
+    "Lowest temperature this week: 20.8\u00b0C in Bed 3 on 2026-07-01 08:20.",
     "Most humid room on average: Outside (68% RH).",
-    "Tightest condensation-risk margin this week: 1.1\u00b0C in Outside.",
+    "Tightest condensation-risk margin this week: 4.4\u00b0C in Loft 2.",
     "Amp-hours consumed this week: 502.76 Ah."
   ],
   "best_comfort_room": {
@@ -383,14 +383,14 @@
     "comfort_score": 6.56
   },
   "peak_temperature": {
-    "value": 34.1,
-    "room": "Loft 1",
-    "timestamp": "2026-06-30 15:10:00"
+    "value": 30.8,
+    "room": "Network",
+    "timestamp": "2026-06-29 00:00:00"
   },
   "lowest_temperature": {
-    "value": 14.1,
-    "room": "Outside",
-    "timestamp": "2026-07-03 03:10:00"
+    "value": 20.8,
+    "room": "Bed 3",
+    "timestamp": "2026-07-01 08:20:00"
   },
   "peak_humidity": {
     "value": 92.8,
@@ -403,8 +403,8 @@
     "timestamp": "2026-06-30 15:30:00"
   },
   "tightest_condensation_margin": {
-    "value": 1.1,
-    "room": "Outside"
+    "value": 4.4,
+    "room": "Loft 2"
   },
   "amp_hours_used": 502.76
 }
