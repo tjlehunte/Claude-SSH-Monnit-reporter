@@ -362,7 +362,7 @@
   ],
   "collective_humidity_events": [],
   "insights": [
-    "Peak temperature this week: 30.8\u00b0C in Network on 2026-06-29 00:00.",
+    "Peak temperature this week: 29.3\u00b0C in Bed 3 on 2026-06-29 00:00.",
     "Lowest temperature this week: 20.8\u00b0C in Bed 3 on 2026-07-01 08:20.",
     "Most humid room on average: Outside (68% RH).",
     "Tightest condensation-risk margin this week: 4.4\u00b0C in Loft 2.",
@@ -383,8 +383,8 @@
     "comfort_score": 6.56
   },
   "peak_temperature": {
-    "value": 30.8,
-    "room": "Network",
+    "value": 29.3,
+    "room": "Bed 3",
     "timestamp": "2026-06-29 00:00:00"
   },
   "lowest_temperature": {
