@@ -24,6 +24,8 @@ from sensor_utils import (
     risk_color,
     room_order,
     to_long,
+    CONDENSATION_HIGHLIGHT_EXCLUDE,
+    PEAK_TEMPERATURE_EXCLUDE,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -79,18 +81,22 @@ def latest_by_room(long_df, metric):
 
 def build_insights(window_df, latest_temp, latest_humidity, latest_margin, rooms):
     lines = []
-    if latest_temp:
-        hottest = max(latest_temp, key=latest_temp.get)
-        coldest = min(latest_temp, key=latest_temp.get)
+    # Outside and the unheated lofts would win warmest/coolest every single
+    # day by nature, which makes the figure meaningless as a comment on the
+    # house - restricted to living/utility rooms, same as the weekly report.
+    indoor_temp = {r: v for r, v in latest_temp.items() if r not in PEAK_TEMPERATURE_EXCLUDE}
+    if indoor_temp:
+        hottest = max(indoor_temp, key=indoor_temp.get)
+        coldest = min(indoor_temp, key=indoor_temp.get)
         lines.append(
-            f"Warmest room: {hottest} ({latest_temp[hottest]:.1f}°C); "
-            f"coolest room: {coldest} ({latest_temp[coldest]:.1f}°C)."
+            f"Warmest room: {hottest} ({indoor_temp[hottest]:.1f}°C); "
+            f"coolest room: {coldest} ({indoor_temp[coldest]:.1f}°C)."
         )
     if latest_humidity:
         most_humid = max(latest_humidity, key=latest_humidity.get)
         lines.append(f"Most humid room: {most_humid} ({latest_humidity[most_humid]:.0f}% RH).")
     if latest_margin:
-        at_risk = {r: m for r, m in latest_margin.items() if r != "Outside" and m < 3.0}
+        at_risk = {r: m for r, m in latest_margin.items() if r not in CONDENSATION_HIGHLIGHT_EXCLUDE and m < 3.0}
         if at_risk:
             details = ", ".join(f"{r} ({m:.1f}°C)" for r, m in sorted(at_risk.items(), key=lambda kv: kv[1]))
             lines.append(f"Condensation risk margin below 3°C in: {details}.")
