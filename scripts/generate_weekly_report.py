@@ -181,33 +181,36 @@ def main():
         )
 
     humidity_series = long_df[long_df["Metric"] == "Humidity"]
-    # Network cupboard runs its own equipment-driven humidity profile, which
-    # makes it an uninformative peak/lowest answer - excluded from this
-    # figure only; it stays fully visible in the charts.
+    # Same living-space-only restriction as temperature above - excluded
+    # from this figure only; still fully visible (and averaged) elsewhere.
     humidity_series_indoor = humidity_series[~humidity_series["Room"].isin(HUMIDITY_HIGHLIGHT_EXCLUDE)]
     if not humidity_series_indoor.empty:
         most_humid_row = humidity_series_indoor.loc[humidity_series_indoor["Value"].idxmax()]
         least_humid_row = humidity_series_indoor.loc[humidity_series_indoor["Value"].idxmin()]
-
-    # Same Network/Outside exclusion as the peak/lowest humidity figures below
-    # - avg_humidity itself stays unrestricted for the comfort ranking and
-    # the full per-room table in stats JSON.
-    avg_humidity_indoor = {k: v for k, v in avg_humidity.items() if k not in HUMIDITY_HIGHLIGHT_EXCLUDE}
-    if avg_humidity_indoor:
-        most_humid = max(avg_humidity_indoor, key=avg_humidity_indoor.get)
         insights.append(
-            f"Most humid room on average: {most_humid} ({avg_humidity_indoor[most_humid]:.0f}% RH)."
+            f"Peak humidity this week: {most_humid_row['Value']:.1f}% in {most_humid_row['Room']} "
+            f"on {most_humid_row['MessageDate'].strftime('%Y-%m-%d %H:%M')}."
         )
+        insights.append(
+            f"Lowest humidity this week: {least_humid_row['Value']:.1f}% in {least_humid_row['Room']} "
+            f"on {least_humid_row['MessageDate'].strftime('%Y-%m-%d %H:%M')}."
+        )
+
+    # Whole-house means include every sensor (Outside, lofts, network cupboard)
+    # - unlike the max/min figures above, an overall average isn't skewed by
+    # a single room dominating, so there's no reason to exclude them here.
+    if not temp_series.empty:
+        insights.append(f"Mean temperature in the SSH this week was {temp_series['Value'].mean():.1f}°C.")
+    if not humidity_series.empty:
+        insights.append(f"Mean humidity in the SSH this week was {humidity_series['Value'].mean():.1f}%.")
 
     # Outside's condensation margin is always going to differ from the indoor
     # rooms in a way that isn't a useful "worst room" comment - excluded from
-    # this specific figure only; it stays fully visible in the chart.
+    # this specific figure only; it stays fully visible in the chart. Not
+    # rendered as a Summary bullet (the Condensation risk margin section
+    # below covers it), but still exposed in stats JSON for the AI insights.
     indoor_margin = {k: v for k, v in worst_margin.items() if k not in CONDENSATION_HIGHLIGHT_EXCLUDE}
-    if indoor_margin:
-        worst_room = min(indoor_margin, key=indoor_margin.get)
-        insights.append(
-            f"Tightest condensation-risk margin this week: {indoor_margin[worst_room]:.1f}°C in {worst_room}."
-        )
+
     if "Current - Cumulative Amp.hours" in window_df.columns:
         series = window_df["Current - Cumulative Amp.hours"].dropna()
         if len(series) >= 2:
@@ -255,6 +258,8 @@ def main():
         "avg_temperature_by_room": {k: round(v, 1) for k, v in avg_temperature.items()},
         "avg_humidity_by_room": {k: round(v, 1) for k, v in avg_humidity.items()},
         "worst_condensation_margin_by_room": {k: round(v, 1) for k, v in worst_margin.items()},
+        "mean_temperature_c": round(float(temp_series["Value"].mean()), 1) if not temp_series.empty else None,
+        "mean_humidity_pct": round(float(humidity_series["Value"].mean()), 1) if not humidity_series.empty else None,
         "daily_mean_temperature_indoor": [
             {"date": d, "value": round(v, 1)} for d, v in daily_indoor_temp.items()
         ],

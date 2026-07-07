@@ -172,11 +172,10 @@ PEAK_TEMPERATURE_EXCLUDE = NON_LIVING_ROOMS
 # excluded from the single "tightest margin" figure (charts still show it).
 CONDENSATION_HIGHLIGHT_EXCLUDE = {"Outside"}
 
-# Network cupboard runs its own equipment-driven humidity profile, and
-# Outside will always be the most/least humid by nature of being outdoors -
-# both make an uninformative "most/least humid room" answer; excluded from
-# that figure only (charts still show them).
-HUMIDITY_HIGHLIGHT_EXCLUDE = {"Network", "Outside"}
+# Same reasoning as PEAK_TEMPERATURE_EXCLUDE, applied to humidity max/min -
+# lofts, the network cupboard, and outside are excluded from peak/lowest
+# humidity figures (they stay eligible for, and are included in, averages).
+HUMIDITY_HIGHLIGHT_EXCLUDE = NON_LIVING_ROOMS
 
 
 def room_category(room):
