@@ -1,0 +1,77 @@
+{
+  "report_label": "2026-06-30_to_2026-07-07",
+  "window_start": "2026-06-30 11:30:00",
+  "window_end": "2026-07-07 11:30:00",
+  "rooms": [
+    "Bed 1",
+    "Bed 2",
+    "Bed 3",
+    "Dining",
+    "Ensuite",
+    "Hall",
+    "Kitchen",
+    "Landing",
+    "Loft 1",
+    "Loft 2",
+    "Lounge",
+    "Network",
+    "Study",
+    "Toilet down",
+    "Toilet up",
+    "Outside"
+  ],
+  "avg_humidity_by_room": {
+    "Bed 1": 54.7,
+    "Bed 2": 53.9,
+    "Bed 3": 54.7,
+    "Dining": 55.6,
+    "Ensuite": 55.3,
+    "Hall": 57.7,
+    "Kitchen": 56.0,
+    "Landing": 54.6,
+    "Loft 1": 56.4,
+    "Loft 2": 57.2,
+    "Lounge": 57.5,
+    "Network": 48.0,
+    "Outside": 68.1,
+    "Study": 54.3,
+    "Toilet down": 55.0,
+    "Toilet up": 55.0
+  },
+  "worst_condensation_margin_by_room": {
+    "Bed 1": 9.4,
+    "Bed 2": 9.6,
+    "Bed 3": 9.5,
+    "Dining": 9.0,
+    "Ensuite": 9.0,
+    "Hall": 8.5,
+    "Kitchen": 8.9,
+    "Landing": 9.4,
+    "Loft 1": 5.5,
+    "Loft 2": 5.6,
+    "Lounge": 8.7,
+    "Network": 11.6,
+    "Outside": 2.4,
+    "Study": 9.4,
+    "Toilet down": 9.3,
+    "Toilet up": 9.2
+  },
+  "insights": [
+    "Peak temperature this week: 32.1\u00b0C in Dining on 2026-07-06 18:10.",
+    "Lowest temperature this week: 16.5\u00b0C in Outside on 2026-07-06 04:30.",
+    "Most humid room on average: Outside (68% RH).",
+    "Tightest condensation-risk margin this week: 2.4\u00b0C in Outside.",
+    "Amp-hours consumed this week: 113.47 Ah."
+  ],
+  "peak_temperature": {
+    "value": 32.1,
+    "room": "Dining",
+    "timestamp": "2026-07-06 18:10:00"
+  },
+  "lowest_temperature": {
+    "value": 16.5,
+    "room": "Outside",
+    "timestamp": "2026-07-06 04:30:00"
+  },
+  "amp_hours_used": 113.47
+}
