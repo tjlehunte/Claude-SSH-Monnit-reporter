@@ -393,9 +393,9 @@
     "timestamp": "2026-07-01 08:20:00"
   },
   "peak_humidity": {
-    "value": 92.8,
-    "room": "Outside",
-    "timestamp": "2026-07-05 06:30:00"
+    "value": 75.7,
+    "room": "Loft 2",
+    "timestamp": "2026-07-05 07:10:00"
   },
   "lowest_humidity": {
     "value": 32.3,
