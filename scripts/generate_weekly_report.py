@@ -26,9 +26,11 @@ from sensor_utils import (
     find_collective_events,
     load_history_wide,
     rank_thermal_comfort,
-    risk_color,
+    room_category_color,
     room_order,
     to_long,
+    CONDENSATION_HIGHLIGHT_EXCLUDE,
+    PEAK_TEMPERATURE_EXCLUDE,
     SHARP_CHANGE_WINDOW_MINUTES,
     SHARP_HUMIDITY_THRESHOLD_PCT,
     SHARP_TEMPERATURE_THRESHOLD_C,
@@ -93,8 +95,9 @@ def most_recent_complete_week(latest_ts):
 
 
 def plot_bar(values_by_room, rooms, title, ylabel, color_fn=None):
+    """color_fn, if given, receives (room, value) and returns a hex color."""
     values = [values_by_room.get(room, float("nan")) for room in rooms]
-    colors = [color_fn(v) if color_fn and v == v else "#4a7ab5" for v in values]
+    colors = [color_fn(room, v) if color_fn else "#4a7ab5" for room, v in zip(rooms, values)]
     fig, ax = plt.subplots(figsize=(10, 4.5))
     ax.bar(rooms, values, color=colors)
     ax.set_title(title)
@@ -151,15 +154,20 @@ def main():
     margin_chart = fig_to_base64(
         plot_bar(
             worst_margin, rooms, "Weekly worst-case condensation risk margin", "°C (minimum seen)",
-            color_fn=risk_color,
+            color_fn=lambda room, v: room_category_color(room),
         )
     )
 
     insights = []
     temp_series = long_df[long_df["Metric"] == "Temperature"]
-    if not temp_series.empty:
-        hottest_row = temp_series.loc[temp_series["Value"].idxmax()]
-        coldest_row = temp_series.loc[temp_series["Value"].idxmin()]
+    # Outside/lofts would win peak & lowest every single week (they're always
+    # the most extreme by nature), which makes the figure meaningless as a
+    # comment on the house - so restrict this specific figure to living/
+    # utility rooms. They stay fully visible in the charts.
+    temp_series_indoor = temp_series[~temp_series["Room"].isin(PEAK_TEMPERATURE_EXCLUDE)]
+    if not temp_series_indoor.empty:
+        hottest_row = temp_series_indoor.loc[temp_series_indoor["Value"].idxmax()]
+        coldest_row = temp_series_indoor.loc[temp_series_indoor["Value"].idxmin()]
         insights.append(
             f"Peak temperature this week: {hottest_row['Value']:.1f}°C in {hottest_row['Room']} "
             f"on {hottest_row['MessageDate'].strftime('%Y-%m-%d %H:%M')}."
@@ -177,10 +185,15 @@ def main():
     if avg_humidity:
         most_humid = max(avg_humidity, key=avg_humidity.get)
         insights.append(f"Most humid room on average: {most_humid} ({avg_humidity[most_humid]:.0f}% RH).")
-    if worst_margin:
-        worst_room = min(worst_margin, key=worst_margin.get)
+
+    # Outside's condensation margin is always going to differ from the indoor
+    # rooms in a way that isn't a useful "worst room" comment - excluded from
+    # this specific figure only; it stays fully visible in the chart.
+    indoor_margin = {k: v for k, v in worst_margin.items() if k not in CONDENSATION_HIGHLIGHT_EXCLUDE}
+    if indoor_margin:
+        worst_room = min(indoor_margin, key=indoor_margin.get)
         insights.append(
-            f"Tightest condensation-risk margin this week: {worst_margin[worst_room]:.1f}°C in {worst_room}."
+            f"Tightest condensation-risk margin this week: {indoor_margin[worst_room]:.1f}°C in {worst_room}."
         )
     if "Current - Cumulative Amp.hours" in window_df.columns:
         series = window_df["Current - Cumulative Amp.hours"].dropna()
@@ -251,7 +264,7 @@ def main():
     if comfort_ranking:
         stats["best_comfort_room"] = comfort_ranking[0]
         stats["worst_comfort_room"] = comfort_ranking[-1]
-    if not temp_series.empty:
+    if not temp_series_indoor.empty:
         stats["peak_temperature"] = {
             "value": round(float(hottest_row["Value"]), 1),
             "room": hottest_row["Room"],
@@ -273,10 +286,10 @@ def main():
             "room": least_humid_row["Room"],
             "timestamp": least_humid_row["MessageDate"].strftime("%Y-%m-%d %H:%M:%S"),
         }
-    if worst_margin:
-        tightest_room = min(worst_margin, key=worst_margin.get)
+    if indoor_margin:
+        tightest_room = min(indoor_margin, key=indoor_margin.get)
         stats["tightest_condensation_margin"] = {
-            "value": round(worst_margin[tightest_room], 1),
+            "value": round(indoor_margin[tightest_room], 1),
             "room": tightest_room,
         }
     if "Current - Cumulative Amp.hours" in window_df.columns:
@@ -314,7 +327,9 @@ ul {{ line-height: 1.6; }}
 <h3>Daily mean</h3>
 <img src="data:image/png;base64,{daily_humidity_chart}" alt="Daily mean humidity by room">
 <h2>Condensation risk margin</h2>
-<p>Worst-case (minimum) margin seen per room over the week. Below 3&deg;C is elevated risk, below 1&deg;C is high risk.</p>
+<p>Worst-case (minimum) margin seen per room over the week. Below 3&deg;C is elevated risk, below 1&deg;C is high risk.
+Bars are colored by sensor type &mdash; <span style="color:#4a7ab5">rooms</span>, <span style="color:#c2793d">lofts</span>,
+and <span style="color:#2e8b57">outside</span> &mdash; since these swing very differently and shouldn't be judged on the same footing.</p>
 <img src="data:image/png;base64,{margin_chart}" alt="Weekly worst-case condensation risk margin by room">
 </body></html>
 """

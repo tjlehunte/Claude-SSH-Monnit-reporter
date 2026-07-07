@@ -161,6 +161,36 @@ def find_collective_events(events, bucket_minutes=COLLECTIVE_BUCKET_MINUTES, min
     return collective
 
 
+# Rooms excluded when picking the week's single "peak"/"lowest" temperature
+# figure for the AI-insights text - Outside and the unheated lofts will
+# essentially always win those slots, which makes the figure meaningless as
+# a comment on the house itself. They stay fully visible in the charts.
+PEAK_TEMPERATURE_EXCLUDE = {"Outside", "Loft 1", "Loft 2"}
+
+# Condensation risk is dominated by Outside's naturally different profile;
+# excluded from the single "tightest margin" figure (charts still show it).
+CONDENSATION_HIGHLIGHT_EXCLUDE = {"Outside"}
+
+
+def room_category(room):
+    if room == "Outside":
+        return "outside"
+    if room in {"Loft 1", "Loft 2"}:
+        return "loft"
+    return "room"
+
+
+ROOM_CATEGORY_COLORS = {
+    "outside": "#2e8b57",  # green
+    "loft": "#c2793d",     # brown
+    "room": "#4a7ab5",     # blue
+}
+
+
+def room_category_color(room):
+    return ROOM_CATEGORY_COLORS[room_category(room)]
+
+
 def load_history_wide():
     """Return the full history as a wide DataFrame, one row per MessageDate."""
     if not HISTORY_FILE.exists():
