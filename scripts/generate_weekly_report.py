@@ -22,7 +22,8 @@ import pandas as pd
 
 from sensor_utils import (
     condensation_margin,
-    detect_sharpest_change,
+    detect_sharp_changes,
+    find_collective_events,
     load_history_wide,
     rank_thermal_comfort,
     risk_color,
@@ -201,16 +202,19 @@ def main():
         .groupby("Day")["Value"].mean()
     )
 
-    # Single sharpest short-window swing per metric (e.g. a window/door being
-    # opened), restricted to actual living-space rooms - outdoor and loft
-    # readings swing with the weather and aren't informative here. Only the
-    # single biggest qualifying event is kept, not every occurrence.
-    sharp_temp_change = detect_sharpest_change(
+    # Every short-window swing per metric (e.g. a window/door being opened),
+    # restricted to actual living-space rooms - outdoor and loft readings
+    # swing with the weather and aren't informative here. Also grouped into
+    # "collective" events where several rooms swing the same way at once,
+    # which is stronger evidence of a whole-house event than any single room.
+    temp_swing_events = detect_sharp_changes(
         temp_series, SHARP_CHANGE_WINDOW_MINUTES, SHARP_TEMPERATURE_THRESHOLD_C
     )
-    sharp_humidity_change = detect_sharpest_change(
+    humidity_swing_events = detect_sharp_changes(
         humidity_series, SHARP_CHANGE_WINDOW_MINUTES, SHARP_HUMIDITY_THRESHOLD_PCT
     )
+    collective_temp_events = find_collective_events(temp_swing_events)
+    collective_humidity_events = find_collective_events(humidity_swing_events)
 
     report_label = f"{start.strftime('%Y-%m-%d')}_to_{end.strftime('%Y-%m-%d')}"
 
@@ -238,8 +242,10 @@ def main():
             "comfortable_humidity_range_pct_rh": [40.0, 60.0],
         },
         "thermal_comfort_ranking": comfort_ranking,
-        "sharpest_temperature_change": sharp_temp_change,
-        "sharpest_humidity_change": sharp_humidity_change,
+        "temperature_swing_events": temp_swing_events,
+        "humidity_swing_events": humidity_swing_events,
+        "collective_temperature_events": collective_temp_events,
+        "collective_humidity_events": collective_humidity_events,
         "insights": insights,
     }
     if comfort_ranking:

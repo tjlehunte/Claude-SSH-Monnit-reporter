@@ -1,6 +1,7 @@
 """Shared helpers for turning data/history.jsonl into tidy per-room data."""
 import json
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -76,15 +77,22 @@ SHARP_CHANGE_EXCLUDE = {"Outside", "Loft 1", "Loft 2"}
 SHARP_CHANGE_WINDOW_MINUTES = 30
 SHARP_TEMPERATURE_THRESHOLD_C = 1.0
 SHARP_HUMIDITY_THRESHOLD_PCT = 5.0
+SHARP_CHANGE_MAX_EVENTS = 20  # safety cap on the returned list, sorted by magnitude
+COLLECTIVE_MIN_ROOMS = 3      # >= this many distinct rooms, same direction, same time bucket
+COLLECTIVE_BUCKET_MINUTES = 30
 
 
-def detect_sharpest_change(metric_long_df, window_minutes, threshold, exclude=SHARP_CHANGE_EXCLUDE):
-    """Find the single largest-magnitude change within `window_minutes` for
-    any in-scope room, in either direction. Returns None if nothing in any
-    room exceeds `threshold`. Assumes readings are on Monnit's 10-minute grid.
+def detect_sharp_changes(metric_long_df, window_minutes, threshold, exclude=SHARP_CHANGE_EXCLUDE):
+    """Find every distinct >=threshold change within `window_minutes`, in
+    either direction, across all in-scope rooms. Assumes readings are on
+    Monnit's 10-minute grid. Consecutive rolling-window hits within the same
+    room are collapsed into a single event (the point of peak magnitude),
+    since one real dip/rise otherwise triggers many overlapping detections.
+    Returns a list sorted by magnitude (largest first), capped at
+    SHARP_CHANGE_MAX_EVENTS.
     """
     window_steps = max(1, window_minutes // 10)
-    best = None
+    events = []
     for room, sub in metric_long_df.groupby("Room"):
         if room in exclude:
             continue
@@ -92,25 +100,65 @@ def detect_sharpest_change(metric_long_df, window_minutes, threshold, exclude=SH
         if len(sub) <= window_steps:
             continue
         values = sub["Value"].to_numpy()
+        times = sub["MessageDate"]
         diffs = values[window_steps:] - values[:-window_steps]
-        if len(diffs) == 0:
+        flagged = [i for i in range(len(diffs)) if abs(diffs[i]) >= threshold]
+
+        clusters = []
+        for i in flagged:
+            if clusters and i - clusters[-1][-1] <= window_steps:
+                clusters[-1].append(i)
+            else:
+                clusters.append([i])
+
+        for cluster in clusters:
+            peak_idx = max(cluster, key=lambda i: abs(diffs[i]))
+            change = diffs[peak_idx]
+            events.append(
+                {
+                    "room": room,
+                    "change": round(float(change), 1),
+                    "direction": "drop" if change < 0 else "rise",
+                    "from_time": times.iloc[peak_idx].strftime("%Y-%m-%d %H:%M:%S"),
+                    "from_value": round(float(values[peak_idx]), 1),
+                    "to_time": times.iloc[peak_idx + window_steps].strftime("%Y-%m-%d %H:%M:%S"),
+                    "to_value": round(float(values[peak_idx + window_steps]), 1),
+                }
+            )
+
+    events.sort(key=lambda e: -abs(e["change"]))
+    return events[:SHARP_CHANGE_MAX_EVENTS]
+
+
+def find_collective_events(events, bucket_minutes=COLLECTIVE_BUCKET_MINUTES, min_rooms=COLLECTIVE_MIN_ROOMS):
+    """Group same-direction events that start within the same time bucket
+    across multiple distinct rooms - evidence of a whole-house event (e.g.
+    several windows opened) rather than one room's isolated behaviour.
+    """
+    buckets = {}
+    for e in events:
+        dt = datetime.strptime(e["from_time"], "%Y-%m-%d %H:%M:%S")
+        bucket_dt = dt - timedelta(minutes=dt.minute % bucket_minutes, seconds=dt.second)
+        buckets.setdefault((bucket_dt, e["direction"]), []).append(e)
+
+    collective = []
+    for (bucket_dt, direction), group in buckets.items():
+        rooms = sorted({g["room"] for g in group})
+        if len(rooms) < min_rooms:
             continue
-        idx = int(abs(diffs).argmax())
-        change = diffs[idx]
-        if abs(change) < threshold:
-            continue
-        if best is None or abs(change) > abs(best["change"]):
-            best = {
-                "room": room,
-                "change": round(float(change), 1),
-                "direction": "drop" if change < 0 else "rise",
-                "from_time": sub["MessageDate"].iloc[idx].strftime("%Y-%m-%d %H:%M:%S"),
-                "from_value": round(float(values[idx]), 1),
-                "to_time": sub["MessageDate"].iloc[idx + window_steps].strftime("%Y-%m-%d %H:%M:%S"),
-                "to_value": round(float(values[idx + window_steps]), 1),
-                "window_minutes": window_minutes,
+        changes = [g["change"] for g in group]
+        collective.append(
+            {
+                "time": bucket_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                "direction": direction,
+                "rooms": rooms,
+                "room_count": len(rooms),
+                "avg_change": round(sum(changes) / len(changes), 1),
+                "largest_change": max(changes, key=abs),
             }
-    return best
+        )
+    collective.sort(key=lambda c: -c["room_count"])
+    return collective
 
 
 def load_history_wide():
