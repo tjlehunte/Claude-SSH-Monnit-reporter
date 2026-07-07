@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Generate a self-contained daily HTML report from data/history.jsonl.
 
-Covers the most recent 24 hours present in the history file (not strictly a
-calendar day, so the report is still meaningful if a run is late or missed).
-Produces three charts (temperature over time, latest humidity per room,
-latest condensation-risk margin per room) plus a short text summary, and
-writes reports/daily/<date>.html and reports/latest.html.
+Reports on the most recently *completed* UTC calendar day (00:00-23:50,
+relative to the latest data on hand, not wall-clock "now") - i.e. "yesterday"
+from the point of view of a run shortly after midnight. Produces three charts
+(temperature over time, latest humidity per room, latest condensation-risk
+margin per room) plus a short text summary, and writes
+reports/daily/<date>.html and reports/latest.html.
 """
 import base64
 import io
@@ -31,7 +32,12 @@ from sensor_utils import (
 ROOT = Path(__file__).resolve().parent.parent
 DAILY_DIR = ROOT / "reports" / "daily"
 LATEST_FILE = ROOT / "reports" / "latest.html"
-WINDOW_HOURS = 24
+
+
+def most_recent_complete_day(latest_ts):
+    """Midnight of latest_ts's day, and the midnight before it (yesterday)."""
+    day_start = latest_ts.normalize()
+    return day_start - timedelta(days=1), day_start
 
 
 def fig_to_base64(fig):
@@ -94,7 +100,11 @@ def build_insights(window_df, latest_temp, latest_humidity, latest_margin, rooms
         )
     if latest_humidity:
         most_humid = max(latest_humidity, key=latest_humidity.get)
-        lines.append(f"Most humid room: {most_humid} ({latest_humidity[most_humid]:.0f}% RH).")
+        least_humid = min(latest_humidity, key=latest_humidity.get)
+        lines.append(
+            f"Most humid room: {most_humid} ({latest_humidity[most_humid]:.0f}% RH); "
+            f"least humid room: {least_humid} ({latest_humidity[least_humid]:.0f}% RH)."
+        )
     if latest_margin:
         at_risk = {r: m for r, m in latest_margin.items() if r not in CONDENSATION_HIGHLIGHT_EXCLUDE and m < 3.0}
         if at_risk:
@@ -116,9 +126,17 @@ def main():
         print("[report] no history yet, skipping report generation")
         return
 
-    end = df_wide["MessageDate"].max()
-    start = end - timedelta(hours=WINDOW_HOURS)
-    window_df = df_wide[df_wide["MessageDate"] >= start]
+    latest_ts = df_wide["MessageDate"].max()
+    start, end = most_recent_complete_day(latest_ts)
+    window_df = df_wide[(df_wide["MessageDate"] >= start) & (df_wide["MessageDate"] < end)]
+
+    if window_df.empty:
+        # No fully-completed day yet (pipeline just started) - fall back to
+        # whatever partial data exists in the current in-progress day.
+        print("[report] no completed calendar day yet; reporting partial current day instead")
+        start, end = end, end + timedelta(days=1)
+        window_df = df_wide[(df_wide["MessageDate"] >= start) & (df_wide["MessageDate"] < end)]
+
     long_df = to_long(window_df)
     rooms = room_order(long_df)
 
@@ -142,7 +160,8 @@ def main():
     )
 
     insights = build_insights(window_df, latest_temp, latest_humidity, latest_margin, rooms)
-    report_date = end.strftime("%Y-%m-%d")
+    report_date = start.strftime("%Y-%m-%d")
+    display_end = window_df["MessageDate"].max() if not window_df.empty else end - timedelta(minutes=10)
 
     html = f"""<!doctype html>
 <html><head><meta charset="utf-8">
@@ -156,7 +175,7 @@ ul {{ line-height: 1.6; }}
 </style></head>
 <body>
 <h1>Daily sensor report</h1>
-<p class="subtitle">Window: {start.strftime('%Y-%m-%d %H:%M')} &ndash; {end.strftime('%Y-%m-%d %H:%M')} (UTC)</p>
+<p class="subtitle">Window: {start.strftime('%Y-%m-%d %H:%M')} &ndash; {display_end.strftime('%Y-%m-%d %H:%M')} (UTC)</p>
 <h2>Summary</h2>
 <ul>{''.join(f'<li>{line}</li>' for line in insights)}</ul>
 <h2>Temperature</h2>
