@@ -4,8 +4,8 @@ Automated daily/weekly reporting for a GivenEnergy inverter's energy flows (sola
 
 ## What it does
 
-- **Daily** ([`givenergy-daily-report.yml`](../.github/workflows/givenergy-daily-report.yml), 02:00 UTC): fetches new half-hourly energy-flow readings, dedups into [`data/history.jsonl`](data/history.jsonl), and generates [`reports/latest.html`](reports/latest.html) for the previous local calendar day.
-- **Weekly** ([`givenergy-weekly-report.yml`](../.github/workflows/givenergy-weekly-report.yml), Monday 02:00 UTC): aggregates the previous Monday–Sunday local week into [`reports/weekly/latest.html`](reports/weekly/latest.html) — raw and daily-total flow charts, self-consumption/self-sufficiency stats, best/worst generation day.
+- **Daily** ([`givenergy-daily-report.yml`](../.github/workflows/givenergy-daily-report.yml), 06:00 UTC): fetches new half-hourly energy-flow readings, dedups into [`data/history.jsonl`](data/history.jsonl), and generates [`reports/latest.html`](reports/latest.html) for the previous local calendar day. Runs later than Monnit's 01:00 UTC deliberately — GivenEnergy's own data has some lag, so the later run gives the previous day's readings time to fully land before fetching.
+- **Weekly** ([`givenergy-weekly-report.yml`](../.github/workflows/givenergy-weekly-report.yml), Monday 06:00 UTC): aggregates the previous Monday–Sunday local week into [`reports/weekly/latest.html`](reports/weekly/latest.html) — raw and daily-total flow charts, self-consumption/self-sufficiency stats, best/worst generation day.
 - **AI insights**: not built yet. A weekly `<!-- AI_INSIGHTS_PLACEHOLDER -->` slot exists in the report (same convention as Monnit) for a future locally-scheduled routine to fill in, once the mechanical pipeline has run for a while and is trusted.
 
 Dated snapshots accumulate in `reports/daily/` and `reports/weekly/` as a permanent history; `reports/latest.html` and `reports/weekly/latest.html` always point at the most recent report.
