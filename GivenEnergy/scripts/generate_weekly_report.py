@@ -112,7 +112,11 @@ def main():
         return
 
     start = window_df["start"].min()
-    end = window_df["start"].max()
+    end = window_df["end"].max()
+    # The last interval's *end* can roll into the next calendar day (e.g. the
+    # 23:30-00:00 interval on the window's last day) - report_label should
+    # still name the last day actually covered, not that rollover day.
+    last_day = window_df["start"].max()
 
     totals = flow_totals(window_df)
     generation = float(total_generation(window_df).sum())
@@ -149,7 +153,7 @@ def main():
             f"lowest: {worst_day.strftime('%Y-%m-%d')} ({daily_generation[worst_day]:.1f} kWh)."
         )
 
-    report_label = f"{start.strftime('%Y-%m-%d')}_to_{end.strftime('%Y-%m-%d')}"
+    report_label = f"{start.strftime('%Y-%m-%d')}_to_{last_day.strftime('%Y-%m-%d')}"
 
     # Compact machine-readable stats, meant for a later local AI-insights
     # routine to turn into narrative commentary without re-reading full history.

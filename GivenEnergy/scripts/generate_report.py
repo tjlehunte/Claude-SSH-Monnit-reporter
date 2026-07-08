@@ -123,7 +123,7 @@ def main():
     insights = build_insights(window_df, totals)
 
     report_date = start.strftime("%Y-%m-%d")
-    display_end = window_df["start"].max() if not window_df.empty else end - timedelta(minutes=30)
+    display_end = window_df["end"].max()
 
     html = f"""<!doctype html>
 <html><head><meta charset="utf-8">
