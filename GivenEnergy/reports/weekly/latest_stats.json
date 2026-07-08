@@ -17,6 +17,10 @@
   "total_export_kwh": 67.2,
   "self_consumption_pct": 41.0,
   "self_sufficiency_pct": 93.19,
+  "estimated_import_cost_gbp": 5.01,
+  "estimated_export_revenue_gbp": 6.51,
+  "estimated_net_bill_gbp": -1.5,
+  "export_rate_coverage_pct": 100.0,
   "daily_generation_kwh": [
     {
       "date": "2026-06-29",
@@ -53,7 +57,10 @@
     "Imported from grid: 3.4 kWh; exported to grid: 67.2 kWh.",
     "Self-consumption: 41% of generated solar was used on-site rather than exported.",
     "Self-sufficiency: 93.19% of home consumption was met without drawing from the grid.",
-    "Best generation day: 2026-07-03 (23.6 kWh); lowest: 2026-07-04 (10.8 kWh)."
+    "Best generation day: 2026-07-03 (23.6 kWh); lowest: 2026-07-04 (10.8 kWh).",
+    "Estimated import cost: \u00a35.01 (unit rate + standing charge).",
+    "Estimated export revenue: \u00a36.51 at your Agile Outgoing rate.",
+    "Estimated net credit: \u00a31.50."
   ],
   "best_generation_day": {
     "date": "2026-07-03",
