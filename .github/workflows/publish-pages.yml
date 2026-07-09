@@ -47,7 +47,7 @@ jobs:
           # link only exists on the Pages site, where the index it points to
           # actually exists. Daily reports sit one level deep, weeklies two.
           # \& because & is special in a sed replacement (expands to the match)
-          BACK='<p style="margin-bottom:0"><a href="HREF" style="color:#4a7ab5;text-decoration:none;font-size:0.9rem">\&larr; All reports</a></p>'
+          BACK='<p style="margin-bottom:0"><a href="HREF" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a></p>'
           for f in _site/monnit/index.html _site/givenergy/index.html; do
             sed -i "s|<body>|<body>\n${BACK/HREF/../}|" "$f"
           done
