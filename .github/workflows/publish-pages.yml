@@ -54,7 +54,11 @@ jobs:
           # DEPTH is the relative prefix back to the site root: daily reports
           # sit one level deep, weeklies two.
           # \& because & is special in a sed replacement (expands to the match)
-          HEADER='<div style="background:#fff;padding:0.6rem 0 0.4rem"><div style="display:flex;align-items:center;gap:1.6rem;flex-wrap:wrap"><img src="DEPTHassets/ehl-logo-light.png" alt="Energy House Labs" style="height:48px;width:auto"><img src="DEPTHassets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab" style="height:48px;width:auto"><img src="DEPTHassets/UOS-logo-light.png" alt="University of Salford" style="height:48px;width:auto"></div><p style="margin:0.6rem 0 0;color:#666">Live data from the Salford Smart Home</p><p style="margin:0.3rem 0 0"><a href="DEPTH" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a></p></div>'
+          # Layout: back link top-left and logos right on one row, then the
+          # data-source line beneath with its top margin matched to the h1
+          # title's default top margin (0.67em of 2em = 1.34rem) so the line
+          # sits with equal spacing from the row above and the title below.
+          HEADER='<div style="background:#fff;padding-top:0.6rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:1.6rem;flex-wrap:wrap"><a href="DEPTH" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a><div style="display:flex;align-items:center;gap:1.6rem;flex-wrap:wrap"><img src="DEPTHassets/ehl-logo-light.png" alt="Energy House Labs" style="height:48px;width:auto"><img src="DEPTHassets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab" style="height:48px;width:auto"><img src="DEPTHassets/UOS-logo-light.png" alt="University of Salford" style="height:48px;width:auto"></div></div><p style="margin:1.34rem 0 0;color:#666">Live data from the Salford Smart Home</p></div>'
           for f in _site/monnit/index.html _site/givenergy/index.html; do
             sed -i "s|<body>|<body>\n${HEADER//DEPTH/../}|" "$f"
           done
