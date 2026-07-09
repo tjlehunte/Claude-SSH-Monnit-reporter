@@ -224,7 +224,7 @@ ul {{ line-height: 1.6; }}
 <h2>Summary</h2>
 <ul>{''.join(f'<li>{line}</li>' for line in insights)}</ul>
 <h2>AI insights</h2>
-<div id="ai-insights"><!-- AI_INSIGHTS_PLACEHOLDER --><p><em>Not yet generated.</em></p></div>
+<div id="ai-insights"><!-- AI_INSIGHTS_PLACEHOLDER --><p><em>AI insights coming soon.</em></p></div>
 <h2>Energy flows</h2>
 <h3>Raw readings</h3>
 <img src="data:image/png;base64,{raw_flows_chart}" alt="Raw energy flows across the week">
