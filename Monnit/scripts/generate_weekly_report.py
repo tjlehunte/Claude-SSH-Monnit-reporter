@@ -368,7 +368,7 @@ ul {{ line-height: 1.6; }}
 <h3>Daily mean</h3>
 <img src="data:image/png;base64,{daily_humidity_chart}" alt="Daily mean humidity by room">
 <h2>Condensation risk margin</h2>
-<p>Worst-case (minimum) margin seen per room over the week. Below 3&deg;C is elevated risk, below 1&deg;C is high risk.
+<p>Worst-case (minimum) margin seen per room over the week. Below <span style="color:{RISK_ELEVATED_COLOR}">{RISK_ELEVATED:.0f}&deg;C is elevated risk</span>, below <span style="color:{RISK_HIGH_COLOR}">{RISK_HIGH:.0f}&deg;C is high risk</span>.
 Bars are coloured by room type &mdash; <span style="color:#4a7ab5">rooms</span>, <span style="color:#c2793d">lofts</span>,
 and <span style="color:#2e8b57">outside</span> &mdash; since these swing very differently and shouldn't be judged on the same footing.</p>
 <img src="data:image/png;base64,{margin_chart}" alt="Weekly worst-case condensation risk margin by room">
