@@ -13,6 +13,12 @@ This repo runs unattended, so a change that "looks right" but hasn't actually be
 
 Pushing changes to `.github/workflows/*.yml` requires a token with `workflow` scope — GitHub silently rejects the push otherwise. Triggering `workflow_dispatch` via the API needs `repo` scope too.
 
+## Pages publishing (`publish-pages.yml`)
+
+Triggered by `workflow_run` (completion of any of the 4 report workflows), **not** `on: push` — the 4 report workflows push using the default `GITHUB_TOKEN`, and GitHub suppresses `push`-triggered workflow runs for pushes made with that token (loop-prevention), so a push trigger here would silently never fire. `workflow_run` is exempt from that suppression and is the correct trigger for "run something after another workflow's push lands."
+
+Pages itself is configured with `build_type: workflow` (set via `POST /repos/.../pages`, not the branch-serving mode) specifically so only what this workflow explicitly copies into `_site/` is ever public — the raw `data/*.jsonl` history and scripts are deliberately excluded, even though this repo is already public. Don't switch Pages back to branch-serving mode without re-considering that.
+
 ## Shared push concurrency
 
 All four workflows (`monnit-daily-report.yml`, `monnit-weekly-report.yml`, `givenergy-daily-report.yml`, `givenergy-weekly-report.yml`) share one concurrency group (`reporter-writes`) so GitHub Actions queues them instead of racing on `git push` — any two of them pushing to `main` at once risks a non-fast-forward rejection. Each also does `git pull --rebase` before pushing as defense-in-depth against a locally-scheduled AI-insights routine pushing at an unpredictable time outside GitHub Actions' concurrency control.
