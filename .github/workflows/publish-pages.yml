@@ -86,9 +86,25 @@ jobs:
             grep -q "All reports" "$f" || { echo "header injection failed for $f"; exit 1; }
             grep -q "ehl-logo-light" "$f" || { echo "logo injection failed for $f"; exit 1; }
           done
+
+          # Favicon: a small house glyph in the same blue used for "room"
+          # bars/legend entries throughout the reports, so the browser tab
+          # matches the report's own colour language. Inline SVG data URI -
+          # single quotes inside it are percent-encoded as %27 (can't use a
+          # literal ' inside this bash single-quoted string, and can't use "
+          # since that would close the href="..." attribute early); # is
+          # percent-encoded as %23 so the browser doesn't treat it as a URL
+          # fragment and truncate the SVG there.
+          FAVICON='<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%234a7ab5%27/%3E%3Cpath d=%27M16 6 6 15h3v11h6v-7h2v7h6V15h3z%27 fill=%27%23fff%27/%3E%3C/svg%3E">'
+          for f in _site/monnit/index.html _site/monnit/weekly/index.html _site/givenergy/index.html _site/givenergy/weekly/index.html; do
+            sed -i "s|<meta charset=\"utf-8\">|<meta charset=\"utf-8\">${FAVICON}|" "$f"
+            grep -q "rel=\"icon\"" "$f" || { echo "favicon injection failed for $f"; exit 1; }
+          done
           cat > _site/index.html <<'EOF'
           <!doctype html>
-          <html><head><meta charset="utf-8"><title>Salford Smart Home reports</title>
+          <html><head><meta charset="utf-8">
+          <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%234a7ab5'/><path d='M16 6 6 15h3v11h6v-7h2v7h6V15h3z' fill='%23fff'/></svg>">
+          <title>Salford Smart Home reports</title>
           <style>
           body { font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 600px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; background: #fff; }
           a { display: block; margin: 0.9rem 0; font-size: 1.15rem; }
