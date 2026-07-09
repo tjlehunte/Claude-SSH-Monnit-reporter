@@ -13,11 +13,6 @@ COLUMN_RE = re.compile(
     r"^(?P<room>.+?) - (?P<metric>Temperature|Humidity|Dewpoint|gpkg|Heat Index|Wet Bulb) - (?P<sensor>\d+)\s*$"
 )
 
-# Condensation risk margin = Temperature - Dewpoint (how many degrees C
-# above the point at which moisture starts condensing on a surface).
-RISK_HIGH = 1.0   # margin below this: high risk (red)
-RISK_ELEVATED = 3.0  # margin below this: elevated risk (amber)
-
 # CIBSE Guide A recommended operative temperatures for UK dwellings, plus the
 # widely used 40-60% RH comfortable-humidity band. Used to mechanically score
 # thermal comfort per room so a downstream narrative process has a ready-made
@@ -273,9 +268,3 @@ def condensation_margin(long_df):
     return merged
 
 
-def risk_color(margin):
-    if margin < RISK_HIGH:
-        return "#d64545"  # red
-    if margin < RISK_ELEVATED:
-        return "#e0a030"  # amber
-    return "#3f9142"  # green

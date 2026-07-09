@@ -23,7 +23,7 @@ from sensor_utils import (
     condensation_margin,
     condensation_room_order,
     load_history_wide,
-    risk_color,
+    room_category_color,
     room_order,
     to_long,
     CONDENSATION_HIGHLIGHT_EXCLUDE,
@@ -69,8 +69,9 @@ def plot_temperature(long_df, rooms):
 
 
 def plot_latest_bar(latest, rooms, value_col, title, ylabel, color_fn=None):
+    """color_fn, if given, receives (room, value) and returns a hex color."""
     values = [latest.get(room, float("nan")) for room in rooms]
-    colors = [color_fn(v) if color_fn and v == v else "#4a7ab5" for v, room in zip(values, rooms)]
+    colors = [color_fn(room, v) if color_fn and v == v else "#4a7ab5" for room, v in zip(rooms, values)]
     fig, ax = plt.subplots(figsize=(10, 4.5))
     ax.bar(rooms, values, color=colors)
     ax.set_title(title)
@@ -160,7 +161,7 @@ def main():
         plot_latest_bar(
             latest_margin, condensation_room_order(rooms), "Margin",
             "Condensation risk margin (Temperature − Dewpoint)", "°C",
-            color_fn=risk_color,
+            color_fn=lambda room, v: room_category_color(room),
         )
     )
 
@@ -188,7 +189,9 @@ ul {{ line-height: 1.6; }}
 <h2>Humidity</h2>
 <img src="data:image/png;base64,{humidity_chart}" alt="Latest humidity by room">
 <h2>Condensation risk margin</h2>
-<p>Margin = Temperature &minus; Dewpoint. Below {3.0}&deg;C is elevated risk, below {1.0}&deg;C is high risk.</p>
+<p>Margin = Temperature &minus; Dewpoint. Below {3.0}&deg;C is elevated risk, below {1.0}&deg;C is high risk.
+Bars are coloured by room type &mdash; <span style="color:#4a7ab5">rooms</span>, <span style="color:#c2793d">lofts</span>,
+and <span style="color:#2e8b57">outside</span> &mdash; since these swing very differently and shouldn't be judged on the same footing.</p>
 <img src="data:image/png;base64,{margin_chart}" alt="Condensation risk margin by room">
 </body></html>
 """
