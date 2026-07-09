@@ -41,33 +41,50 @@ jobs:
           cp GivenEnergy/reports/latest.html _site/givenergy/index.html
           cp GivenEnergy/reports/weekly/latest.html _site/givenergy/weekly/index.html
 
-          # Inject a back-to-index link at the top of each report. Done here at
-          # publish time, not in the report generators, so the reports stay
-          # self-contained everywhere else (repo files, dated snapshots) - the
-          # link only exists on the Pages site, where the index it points to
-          # actually exists. Daily reports sit one level deep, weeklies two.
+          mkdir -p _site/assets
+          cp assets/ehl-logo-light.png assets/sml-logo-light.png assets/UOS-logo-light.png _site/assets/
+
+          # Inject a header (partner logos + data-source line + back-to-index
+          # link) at the top of each report. Done here at publish time, not in
+          # the report generators, so the reports stay self-contained everywhere
+          # else (repo files, dated snapshots) - the header only exists on the
+          # Pages site. Logos share one fixed height so they read as the same
+          # size despite different aspect ratios, and sit on an explicit white
+          # strip so force-dark mobile browsers can't invert them illegible.
+          # DEPTH is the relative prefix back to the site root: daily reports
+          # sit one level deep, weeklies two.
           # \& because & is special in a sed replacement (expands to the match)
-          BACK='<p style="margin-bottom:0"><a href="HREF" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a></p>'
+          HEADER='<div style="background:#fff;padding:0.6rem 0 0.4rem"><div style="display:flex;align-items:center;gap:1.6rem;flex-wrap:wrap"><img src="DEPTHassets/ehl-logo-light.png" alt="Energy House Labs" style="height:48px;width:auto"><img src="DEPTHassets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab" style="height:48px;width:auto"><img src="DEPTHassets/UOS-logo-light.png" alt="University of Salford" style="height:48px;width:auto"></div><p style="margin:0.6rem 0 0;color:#666">Live data from the Salford Smart Home</p><p style="margin:0.3rem 0 0"><a href="DEPTH" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a></p></div>'
           for f in _site/monnit/index.html _site/givenergy/index.html; do
-            sed -i "s|<body>|<body>\n${BACK/HREF/../}|" "$f"
+            sed -i "s|<body>|<body>\n${HEADER//DEPTH/../}|" "$f"
           done
           for f in _site/monnit/weekly/index.html _site/givenergy/weekly/index.html; do
-            sed -i "s|<body>|<body>\n${BACK/HREF/../../}|" "$f"
+            sed -i "s|<body>|<body>\n${HEADER//DEPTH/../../}|" "$f"
           done
           # Fail loudly if the injection didn't land (e.g. the generators'
           # <body> tag changes shape) rather than silently publishing without it.
           for f in _site/monnit/index.html _site/monnit/weekly/index.html _site/givenergy/index.html _site/givenergy/weekly/index.html; do
-            grep -q "All reports" "$f" || { echo "back-link injection failed for $f"; exit 1; }
+            grep -q "All reports" "$f" || { echo "header injection failed for $f"; exit 1; }
+            grep -q "ehl-logo-light" "$f" || { echo "logo injection failed for $f"; exit 1; }
           done
           cat > _site/index.html <<'EOF'
           <!doctype html>
-          <html><head><meta charset="utf-8"><title>Reports</title>
+          <html><head><meta charset="utf-8"><title>Salford Smart Home reports</title>
           <style>
-          body { font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 600px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; }
+          body { font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 600px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; background: #fff; }
           a { display: block; margin: 0.9rem 0; font-size: 1.15rem; }
+          .logos { display: flex; align-items: center; gap: 1.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+          .logos img { height: 48px; width: auto; }
+          .source { color: #666; }
           </style></head>
           <body>
+          <div class="logos">
+          <img src="assets/ehl-logo-light.png" alt="Energy House Labs">
+          <img src="assets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab">
+          <img src="assets/UOS-logo-light.png" alt="University of Salford">
+          </div>
           <h1>Reports</h1>
+          <p class="source">Live data from the Salford Smart Home.</p>
           <a href="monnit/">Monnit &mdash; daily sensor report</a>
           <a href="monnit/weekly/">Monnit &mdash; weekly sensor report</a>
           <a href="givenergy/">GivenEnergy &mdash; daily energy report</a>
