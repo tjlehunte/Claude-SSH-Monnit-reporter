@@ -59,9 +59,10 @@ jobs:
           mkdir -p _site/assets
           cp assets/ehl-logo-light.png assets/sml-logo-light.png assets/UOS-logo-light.png _site/assets/
 
-          # Inject a header (partner logos + data-source line + back-to-index
-          # link) at the top of each report. Done here at publish time, not in
-          # the report generators, so the reports stay self-contained everywhere
+          # Inject a header (partner logos + back-to-index link, sticky) plus
+          # a data-source line (not sticky, scrolls away with the report) at
+          # the top of each report. Done here at publish time, not in the
+          # report generators, so the reports stay self-contained everywhere
           # else (repo files, dated snapshots) - the header only exists on the
           # Pages site. Logos share one fixed height so they read as the same
           # size despite different aspect ratios, and sit on an explicit white
@@ -69,11 +70,14 @@ jobs:
           # DEPTH is the relative prefix back to the site root: daily reports
           # sit one level deep, weeklies two.
           # \& because & is special in a sed replacement (expands to the match)
-          # Layout: back link top-left and logos right on one row, then the
-          # data-source line beneath with its top margin matched to the h1
-          # title's default top margin (0.67em of 2em = 1.34rem) so the line
-          # sits with equal spacing from the row above and the title below.
-          HEADER='<div style="background:#fff;padding-top:0.6rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:1.6rem;flex-wrap:wrap"><a href="DEPTH" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a><div style="display:flex;align-items:center;gap:1.6rem;flex-wrap:wrap"><img src="DEPTHassets/ehl-logo-light.png" alt="Energy House Labs" style="height:48px;width:auto"><img src="DEPTHassets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab" style="height:48px;width:auto"><img src="DEPTHassets/UOS-logo-light.png" alt="University of Salford" style="height:48px;width:auto"></div></div><p style="margin:1.34rem 0 0;color:#666">These reports are based on data collected from the Salford Smart Home</p></div>'
+          # position:sticky pins just the back-link+logos row to the top of
+          # the viewport as the report scrolls beneath it (like a frozen
+          # pane) - z-index keeps it above the charts, the border gives the
+          # pinned row a visible edge against whatever scrolls under it. The
+          # data-source line stays outside the sticky div, with its top
+          # margin matched to the h1 title's default top margin (0.67em of
+          # 2em = 1.34rem) so it sits with equal spacing above and below.
+          HEADER='<div style="background:#fff;padding-top:0.6rem;padding-bottom:0.6rem;position:sticky;top:0;z-index:10;border-bottom:1px solid #e5e5e5"><div style="display:flex;justify-content:space-between;align-items:center;gap:1.6rem;flex-wrap:wrap"><a href="DEPTH" style="color:#4a7ab5;text-decoration:none;font-size:1.15rem">\&larr; All reports</a><div style="display:flex;align-items:center;gap:1.6rem;flex-wrap:wrap"><img src="DEPTHassets/ehl-logo-light.png" alt="Energy House Labs" style="height:48px;width:auto"><img src="DEPTHassets/sml-logo-light.png" alt="Smart Meters, Smart Homes Lab" style="height:48px;width:auto"><img src="DEPTHassets/UOS-logo-light.png" alt="University of Salford" style="height:48px;width:auto"></div></div></div><p style="margin:1.34rem 0 0;color:#666">These reports are based on data collected from the Salford Smart Home</p>'
           for f in _site/monnit/index.html _site/givenergy/index.html; do
             sed -i "s|<body>|<body>\n${HEADER//DEPTH/../}|" "$f"
           done
